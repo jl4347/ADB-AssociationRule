@@ -1,5 +1,4 @@
 import csv
-import collections
 import itertools
 
 def parseCSV(filename):
@@ -72,17 +71,23 @@ def generateCk(Lk_1, lookup, times):
 			test.append(token)
 			print 'the possible item to be test:',test
 			test_result = testSubset(last_itemset, test, times-1)
-			print test_result
 
 			if test_result:  
 				Ck[tuple(test)] = 0
 	print 'Ck:',Ck
 	return Ck
 
-def containsItem(record, )
+def containsItem(record, itemset):
+	'''
+		This method check if a record contains a certain itemset
+	'''
+	for item in itemset:
+		if item not in record:
+			return False 
+	return True
 
 
-def apriori(data, lookup_base, min_supp, min_conf):
+def apriori(data, lookup_base, min_supp):
 	'''
 		Implement apriori algorithm:
 
@@ -107,35 +112,116 @@ def apriori(data, lookup_base, min_supp, min_conf):
 	turn = 1
 	lookup = lookup_base
 	while L.has_key(turn) and L[turn]!={}:
-		print L[turn], turn
 		turn+=1
+		print 'turn:', turn
+		print 'Lk-1:',L[turn-1]
+		print lookup
 		C[turn] = generateCk(L[turn-1], lookup, turn)
 
-		# traverse the data compute for L and lookup
-		#for record in data:
+		# traverse the data compute for Ck and lookup
+		lookup = {}
+		for record in data:
+			for item in C[turn]:
+				result = containsItem(record, item)
+				if result:
+					C[turn][item]+=1
+					lookup.update({key:(lookup[key]+1 if lookup.has_key(key)
+									else 1) for key in item })
+
+		# compute for the Lk
+		L[turn] = {key: C[turn][key] for key in C[turn].keys() 
+					if C[turn][key] >= min_supp }
+		print 'L[',turn,']', L[turn]
+		print 
+
+	print 'L: ',L
+
 	return L
 
 
-	
-
-def getRules(L):
+def getFreqSetAndRules(L,  min_conf, min_supp, total):
 	'''
-		This method take L as input, and output all rule with conf > min_conf
+		This method take L as input, and output all rule with conf>min_conf
 	'''
-	
+	print
+	print '-----------getRules------------'
+	rules = {}
+	freqSet = {}
 
+	# initialize freqSet
+	if L.has_key(1): freqSet = {key:float(L[1][key])/total 
+								for key in L[1].keys()}
+
+	# compute for freqSet and rules
+	for turn in range(2, len(L)):
+		freqSet.update({key:float(L[turn][key])/total 
+						for key in L[turn].keys()})
+
+		# loop through each item in Lk
+		for item in L[turn]:
+
+			# get the LHS of each item
+			last_itemset = itertools.combinations(item, turn-1)
+			supp = float(L[turn][item])/total
+
+			for aRule in last_itemset:
+				conf = float(L[turn][item])/L[turn-1][aRule]
+				if conf <min_conf:
+					continue
+				
+				LHS = str(list(set(item)&set(aRule)))
+				RHS = str(list(set(item)-set(aRule)))
+				string = LHS + ' => '+ RHS \
+					+ ' (Conf: '+str(conf)+', Supp: '+str(supp)+')'
+				rules.update({string: conf})
+
+	print freqSet
+	print rules
+	return freqSet, rules
 
 def main():
 	data, lookup = parseCSV('test.csv')
-	print lookup
+	#print lookup
 	# min_supp 0.3 min_conf 0.5
 
-	min_supp = len(data)*0.7
-	min_conf = len(data)*0.8
-	apriori(data, lookup, min_supp, min_conf)
-
 	
+	min_supp = 0.7
+	total = len(data) 
+	min_supp_num = len(data)*min_supp
+	min_conf = 0.8
 
+	possible_rules = apriori(data, lookup, min_supp_num)
+	freqSet, rules = getFreqSetAndRules(possible_rules, min_conf,\
+						min_supp, total)
+	output(freqSet, rules, min_supp, min_conf)
+
+def output(freqSet, rules, min_supp, min_conf):
+	import operator
+
+	print
+	print '-----------output--------------'
+	
+	freqSet_output = [str(list(key))+', '+str(value) for (key,value) 
+				in sorted(freqSet.items(), key=operator.itemgetter(1))]
+
+	freqSet_output.reverse()
+
+	rules_output = [key for (key,value) in sorted(rules.items()
+									, key=operator.itemgetter(1))]
+	rules_output.reverse()
+
+	with open('output.txt', 'w') as f:
+		f.write("----Frequent itemsets (min_supp = "+ str(min_supp)+\
+			")----\n\n")
+		for item in freqSet_output:
+			f.write(item+"\n")
+
+		f.write("\n\n\n\n")
+		f.write("----High-confidence association rules (min_conf = "+\
+				str(min_conf)+")----\n\n")
+
+		for item in rules_output:
+			f.write(item+"\n")
 
 if __name__ == '__main__':
 	main()

@@ -4,6 +4,11 @@ Name: Mingfei Ge(mg3534), Jialun Liu(jl4347)
 How to run our program
 =================================================================================
 
+We have write a shell script to run the python program, just cd in the program
+directory and do:
+
+$ ./run.sh INTEGRATED-DATASET.csv 0.3 0.5
+where 0.3 is the minimum support and 0.5 is the minimum confidence
 
 
 =================================================================================

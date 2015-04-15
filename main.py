@@ -1,5 +1,6 @@
 import csv
 import itertools
+import sys
 
 def parseCSV(filename):
 	'''
@@ -11,6 +12,7 @@ def parseCSV(filename):
 		spamreader = csv.reader(csvfile, delimiter=',', quotechar='|')
 		for row in spamreader:
 			row.sort()
+			row = [item for item in row if item != '' and item != ' ']
 			data.append(row)
 			lookup_base.update( { item: (lookup_base[item]+1
 								if lookup_base.has_key(item)
@@ -180,15 +182,16 @@ def getFreqSetAndRules(L,  min_conf, min_supp, total):
 	return freqSet, rules
 
 def main():
-	data, lookup = parseCSV('test.csv')
+
+	fileName = sys.argv[1]
+	min_supp = float(sys.argv[2])
+	min_conf = float(sys.argv[3])
+	data, lookup = parseCSV(fileName)
 	#print lookup
 	# min_supp 0.3 min_conf 0.5
 
-	
-	min_supp = 0.7
 	total = len(data) 
 	min_supp_num = len(data)*min_supp
-	min_conf = 0.8
 
 	possible_rules = apriori(data, lookup, min_supp_num)
 	freqSet, rules = getFreqSetAndRules(possible_rules, min_conf,\

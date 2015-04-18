@@ -52,8 +52,11 @@ Internal design of our project
 
 
 =================================================================================
-Query Modification Method
+Discussion of the Association rules
 =================================================================================
+Results of the running the following command:
+$ ./run.sh processed_Extract_DOHMH_New_York_City_Restaurant_Inspection_Results.csv 0.3 0.5
+
 
 
 

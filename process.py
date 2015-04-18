@@ -2,6 +2,7 @@ import csv
 import sys
 import math
 import re
+import json
 
 def parseCSV(filename):
 	'''
@@ -10,7 +11,7 @@ def parseCSV(filename):
 	firstRow = True
 	restaurant = dict()
 	count = 0
-	# violationCode = dict()
+	violationCode = dict()
 	with open(filename, 'r') as csvfile:
 		spamreader = csv.reader(csvfile.read().splitlines())
 		for row in spamreader:
@@ -26,14 +27,16 @@ def parseCSV(filename):
 						count += 1
 						restaurant[row[1]] = set()
 					if row[2] != '':
-						restaurant[row[1]].add(row[2])
+						restaurant[row[1]].add(row[3])
 
-				# if row[2] not in violationCode:
-				# 	violationCode[row[2]] = row[]
+						if row[2] not in violationCode:
+							violationCode[row[2]] = row[3]
+
 	print restaurant
 	print count
+	print violationCode
 	
-	return restaurant
+	return restaurant, violationCode
 
 def writeCSV(data, fileName):
 	'''
@@ -45,12 +48,18 @@ def writeCSV(data, fileName):
 	    for restaurant in data:
 	    	writer.writerow(list(data[restaurant]))
 
+# To write dictionary into a file for debugging
+def jsonWrite(data, fileName):
+	with open(fileName, 'w') as outfile:
+		json.dump(data, outfile, sort_keys = True, indent = 4)
+
 def main():
 	fileName = sys.argv[1]
 
 	data = dict()
+	violationCode = dict()
 
-	data = parseCSV(fileName)
+	data, violationCode = parseCSV(fileName)
 	# print data
 
 	writeCSV(data, fileName)

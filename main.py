@@ -9,7 +9,7 @@ def parseCSV(filename):
 	data = []
 	lookup_base = {}
 	with open(filename, 'r') as csvfile:
-		spamreader = csv.reader(csvfile, delimiter=',', quotechar='|')
+		spamreader = csv.reader(csvfile.read().splitlines())
 		for row in spamreader:
 			row.sort()
 			row = [item for item in row if item != '' and item != ' ']

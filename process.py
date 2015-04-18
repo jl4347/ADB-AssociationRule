@@ -42,14 +42,16 @@ def parseCSV(filename):
 				# del row[20]
 
 				# combine the salary range from and range to fields
-				row.append(str(row[8]) + '-' + str(row[9]))
+				# row.append(str(row[8]) + '-' + str(row[9]))
+				row[8] = 'f' + str(int(row[8]))
+				row[9] = 't' + str(int(row[9]))
 				print row[11]
 				m = re.match("(\d+\/)\d+\/(\d+) \d+", str(row[11]))
 				row.append(m.group(1) + m.group(2))
 				del row[11]
 				
-				del row[9]
-				del row[8]
+				# del row[9]
+				# del row[8]
 				data.append(row)
 	
 	return data

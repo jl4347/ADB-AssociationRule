@@ -42,12 +42,13 @@ def writeCSV(data, fileName):
 
 	with open('processed_' + fileName, 'w') as fp:
 	    writer = csv.writer(fp, delimiter=',')
-	    writer.writerows(data)
+	    for restaurant in data:
+	    	writer.writerow(list(data[restaurant]))
 
 def main():
 	fileName = sys.argv[1]
 
-	data = list()
+	data = dict()
 
 	data = parseCSV(fileName)
 	# print data

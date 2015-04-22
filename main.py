@@ -172,14 +172,21 @@ def main():
 	fileName = sys.argv[1]
 	min_supp = float(sys.argv[2])
 	min_conf = float(sys.argv[3])
+
+	# parse the CSV file and return the lists of data
 	data, lookup = parseCSV(fileName)
 
 	total = len(data) 
 	min_supp_num = len(data)*min_supp
 
+	# generate freq itemset
 	possible_rules = apriori(data, lookup, min_supp_num)
+
+	# filter out low conf rule
 	freqSet, rules = getFreqSetAndRules(possible_rules, min_conf,\
 						min_supp, total)
+
+	# output in the output file
 	output(freqSet, rules, min_supp, min_conf)
 
 def output(freqSet, rules, min_supp, min_conf):

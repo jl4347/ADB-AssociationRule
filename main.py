@@ -173,6 +173,8 @@ def main():
 	min_supp = float(sys.argv[2])
 	min_conf = float(sys.argv[3])
 
+	print "Processing ..."
+
 	# parse the CSV file and return the lists of data
 	data, lookup = parseCSV(fileName)
 

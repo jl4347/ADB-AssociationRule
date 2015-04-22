@@ -30,7 +30,6 @@ def testSubset(testset ,testlist, size):
 	'''
 	subset = itertools.combinations(testlist, size)
 	for elem in subset:
-		print 'elem:', elem
 		if elem not in testset: return False
 	return True
 
@@ -42,13 +41,13 @@ def generateCk(Lk_1, lookup, times):
 		The procedure is first generate combinations of k-size itemset,
 		then check for the all subset with k-1 size. 
 
-		The lookup table is a list contains all possible tokens, the 
+		The lookup table is a dic contains all possible tokens, the 
 		format is like {'pen':4, 'ink':3, 'diary':3, 'soap':2}
+
+		The lookup list is a list version of lookup table, ignoring the
+		value in the dic.
 	'''
 
-	# Lk_1={('diary','pen'):3, ('ink', 'pen'): 3 , ('diary','ink'):2}
-	# times = 3
-	# lookup = {'pen':4, 'ink':3, 'diary':3, 'soap':2}
 	last_itemset = [item for item in Lk_1.keys()]
 	last_itemset.sort()
 	# delete those tokens that can never be a combination because num is 
@@ -59,24 +58,22 @@ def generateCk(Lk_1, lookup, times):
 	
 	Ck = {}
 	for item in last_itemset:
-		print 'item:',item
+
 		# delete already used tokens thus work on small num of tokens
 		delword = item[-1]
 		if delword in tokens: del tokens[0:tokens.index(delword)+1]
 		
-		print 'tokens left:', tokens
 		if tokens == []: break
 
 		# iterate through tokens list 
 		for token in tokens:
 			test = list(item)
 			test.append(token)
-			print 'the possible item to be test:',test
 			test_result = testSubset(last_itemset, test, times-1)
 
 			if test_result:  
 				Ck[tuple(test)] = 0
-	print 'Ck:',Ck
+
 	return Ck
 
 def containsItem(record, itemset):
@@ -109,15 +106,12 @@ def apriori(data, lookup_base, min_supp):
 	C[1] = {tuple([key]):lookup_base[key] for key in lookup_base.keys()}
 	L[1] = {tuple([key]):lookup_base[key] for key in lookup_base.keys() 
 			if lookup_base[key]>= min_supp }
-	#print 'L1',L[1]
 
 	turn = 1
 	lookup = lookup_base
 	while L.has_key(turn) and L[turn]!={}:
 		turn+=1
-		print 'turn:', turn
-		print 'Lk-1:',L[turn-1]
-		print lookup
+		
 		C[turn] = generateCk(L[turn-1], lookup, turn)
 
 		# traverse the data compute for Ck and lookup
@@ -133,10 +127,6 @@ def apriori(data, lookup_base, min_supp):
 		# compute for the Lk
 		L[turn] = {key: C[turn][key] for key in C[turn].keys() 
 					if C[turn][key] >= min_supp }
-		print 'L[',turn,']', L[turn]
-		print 
-
-	print 'L: ',L
 
 	return L
 
@@ -145,8 +135,6 @@ def getFreqSetAndRules(L,  min_conf, min_supp, total):
 	'''
 		This method take L as input, and output all rule with conf>min_conf
 	'''
-	print
-	print '-----------getRules------------'
 	rules = {}
 	freqSet = {}
 
@@ -177,8 +165,6 @@ def getFreqSetAndRules(L,  min_conf, min_supp, total):
 					+ ' (Conf: '+str(conf)+', Supp: '+str(supp)+')'
 				rules.update({string: conf})
 
-	print freqSet
-	print rules
 	return freqSet, rules
 
 def main():
@@ -187,8 +173,6 @@ def main():
 	min_supp = float(sys.argv[2])
 	min_conf = float(sys.argv[3])
 	data, lookup = parseCSV(fileName)
-	#print lookup
-	# min_supp 0.3 min_conf 0.5
 
 	total = len(data) 
 	min_supp_num = len(data)*min_supp
@@ -200,9 +184,6 @@ def main():
 
 def output(freqSet, rules, min_supp, min_conf):
 	import operator
-
-	print
-	print '-----------output--------------'
 	
 	freqSet_output = [str(list(key))+', '+str(value) for (key,value) 
 				in sorted(freqSet.items(), key=operator.itemgetter(1))]
